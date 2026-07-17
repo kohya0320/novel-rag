@@ -41,6 +41,7 @@ ${novel.reviews.slice(0, 2).map((r) => `・${r}`).join('\n')}
 
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
   const result = await model.generateContent(`あなたは小説推薦の専門家です。ユーザーの要望に基づいて、検索結果の小説を分析し、おすすめを日本語で説明してください。
+マークダウン記法（#、##、**、*、- など）は一切使わず、プレーンな日本語テキストで出力してください。
 
 ユーザーの要望:
 「${query}」

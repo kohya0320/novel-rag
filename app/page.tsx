@@ -31,12 +31,22 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [seeding, setSeeding] = useState(false)
   const [seedResult, setSeedResult] = useState<string | null>(null)
+  const [elapsed, setElapsed] = useState<number | null>(null)
+
+  const stripMarkdown = (text: string) =>
+    text
+      .replace(/#{1,6}\s*/g, '')
+      .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+      .replace(/^[-*]\s+/gm, '')
+      .replace(/^\s*:\s*/gm, '')
 
   const handleSearch = async () => {
     if (!query.trim()) return
     setLoading(true)
     setError(null)
     setResult(null)
+    setElapsed(null)
+    const start = Date.now()
 
     try {
       const res = await fetch('/api/search', {
@@ -46,6 +56,7 @@ export default function Home() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? '検索に失敗しました')
+      setElapsed((Date.now() - start) / 1000)
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました')
@@ -124,11 +135,14 @@ export default function Home() {
         {/* 検索結果 */}
         {result && (
           <div className="space-y-6">
+            {elapsed !== null && (
+              <p className="text-slate-500 text-xs text-right">検索時間: {elapsed.toFixed(1)}秒</p>
+            )}
             {/* AI推薦文 */}
             <div className="bg-blue-950/60 border border-blue-700 rounded-2xl p-6">
               <h2 className="text-base font-semibold mb-3 text-blue-300">AI のおすすめコメント</h2>
               <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-sm">
-                {result.recommendation}
+                {stripMarkdown(result.recommendation)}
               </p>
             </div>
 
