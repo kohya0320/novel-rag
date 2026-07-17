@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface Novel {
   id: number
@@ -37,6 +37,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [elapsed, setElapsed] = useState<number | null>(null)
+  const [remaining, setRemaining] = useState<number | null>(null)
+  const avgDurationRef = useRef<number>(12)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [])
 
   const handleSearch = async () => {
     if (!query.trim()) return
@@ -44,7 +51,15 @@ export default function Home() {
     setError(null)
     setResult(null)
     setElapsed(null)
+    setRemaining(null)
     const start = Date.now()
+    const estimate = avgDurationRef.current
+
+    timerRef.current = setInterval(() => {
+      const passed = (Date.now() - start) / 1000
+      const rem = Math.max(0, estimate - passed)
+      setRemaining(rem)
+    }, 200)
 
     try {
       const res = await fetch('/api/search', {
@@ -54,12 +69,16 @@ export default function Home() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? '検索に失敗しました')
+      const actual = (Date.now() - start) / 1000
+      avgDurationRef.current = actual
       setResult(data)
-      setElapsed((Date.now() - start) / 1000)
+      setElapsed(actual)
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました')
     } finally {
+      if (timerRef.current) clearInterval(timerRef.current)
       setLoading(false)
+      setRemaining(null)
     }
   }
 
@@ -102,7 +121,11 @@ export default function Home() {
             disabled={loading || !query.trim()}
             className="mt-4 w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-base"
           >
-            {loading ? '検索中...' : '小説を探す (Cmd+Enter)'}
+            {loading
+              ? remaining !== null && remaining > 0
+                ? `検索中... 残り約${Math.ceil(remaining)}秒`
+                : '検索中... もうすぐ完了'
+              : '小説を探す (Cmd+Enter)'}
           </button>
           {elapsed !== null && (
             <p className="text-slate-500 text-xs text-right mt-2">検索時間: {elapsed.toFixed(1)}秒</p>
