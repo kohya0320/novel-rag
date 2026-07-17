@@ -24,21 +24,19 @@ const EXAMPLE_QUERIES = [
   '努力と才能の葛藤を描いた青春スポーツ小説',
 ]
 
+const stripMarkdown = (text: string) =>
+  text
+    .replace(/#{1,6}\s*/g, '')
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
+    .replace(/^[-*]\s+/gm, '')
+    .replace(/^\s*:\s*/gm, '')
+
 export default function Home() {
   const [query, setQuery] = useState('')
   const [result, setResult] = useState<SearchResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [seeding, setSeeding] = useState(false)
-  const [seedResult, setSeedResult] = useState<string | null>(null)
   const [elapsed, setElapsed] = useState<number | null>(null)
-
-  const stripMarkdown = (text: string) =>
-    text
-      .replace(/#{1,6}\s*/g, '')
-      .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')
-      .replace(/^[-*]\s+/gm, '')
-      .replace(/^\s*:\s*/gm, '')
 
   const handleSearch = async () => {
     if (!query.trim()) return
@@ -56,29 +54,12 @@ export default function Home() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? '検索に失敗しました')
-      setElapsed((Date.now() - start) / 1000)
       setResult(data)
+      setElapsed((Date.now() - start) / 1000)
     } catch (err) {
       setError(err instanceof Error ? err.message : '予期しないエラーが発生しました')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSeed = async () => {
-    setSeeding(true)
-    setSeedResult(null)
-    try {
-      const res = await fetch('/api/seed', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'シードに失敗しました')
-      const inserted = data.results.filter((r: { status: string }) => r.status === 'inserted').length
-      const skipped = data.results.filter((r: { status: string }) => r.status.includes('skipped')).length
-      setSeedResult(`完了: ${inserted}件追加、${skipped}件スキップ`)
-    } catch (err) {
-      setSeedResult(`エラー: ${err instanceof Error ? err.message : '失敗しました'}`)
-    } finally {
-      setSeeding(false)
     }
   }
 
@@ -123,6 +104,9 @@ export default function Home() {
           >
             {loading ? '検索中...' : '小説を探す (Cmd+Enter)'}
           </button>
+          {elapsed !== null && (
+            <p className="text-slate-500 text-xs text-right mt-2">検索時間: {elapsed.toFixed(1)}秒</p>
+          )}
         </div>
 
         {/* エラー表示 */}
@@ -135,9 +119,6 @@ export default function Home() {
         {/* 検索結果 */}
         {result && (
           <div className="space-y-6">
-            {elapsed !== null && (
-              <p className="text-slate-500 text-xs text-right">検索時間: {elapsed.toFixed(1)}秒</p>
-            )}
             {/* AI推薦文 */}
             <div className="bg-blue-950/60 border border-blue-700 rounded-2xl p-6">
               <h2 className="text-base font-semibold mb-3 text-blue-300">AI のおすすめコメント</h2>
@@ -188,23 +169,6 @@ export default function Home() {
             </div>
           </div>
         )}
-
-        {/* 開発用: シードボタン */}
-        <div className="mt-12 pt-6 border-t border-slate-700">
-          <p className="text-slate-500 text-xs mb-3">
-            開発用: ダミーデータを Supabase に投入します（初回のみ実行）
-          </p>
-          <button
-            onClick={handleSeed}
-            disabled={seeding}
-            className="bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-slate-300 text-sm px-4 py-2 rounded-lg transition"
-          >
-            {seeding ? '投入中...' : 'ダミーデータをシード'}
-          </button>
-          {seedResult && (
-            <p className="text-slate-400 text-xs mt-2">{seedResult}</p>
-          )}
-        </div>
       </div>
     </main>
   )
