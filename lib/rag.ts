@@ -40,16 +40,19 @@ ${novel.reviews.slice(0, 2).map((r) => `・${r}`).join('\n')}
     .join('\n\n---\n\n')
 
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-  const result = await model.generateContent(`あなたは小説推薦の専門家です。ユーザーの要望に基づいて、検索結果の小説を分析し、おすすめを日本語で説明してください。
-マークダウン記法（#、##、**、*、- など）は一切使わず、プレーンな日本語テキストで出力してください。
+  const result = await model.generateContent(`あなたは小説推薦の専門家です。ユーザーの要望に基づいて、検索結果の小説をおすすめ順に紹介してください。
+
+以下のフォーマットで各小説を紹介してください（マークダウン記法は一切使わないこと）:
+
+【タイトル】
+著者名
+（この要望に合っている理由と魅力を2〜3文で簡潔に）
 
 ユーザーの要望:
 「${query}」
 
 ベクトル検索でヒットした小説:
-${context}
-
-上記の小説について、ユーザーの要望にどう合致しているか説明しながら、おすすめ順に紹介してください。各小説の魅力と、なぜこの要望に合っているかを簡潔に添えてください。`)
+${context}`)
 
   return result.response.text()
 }

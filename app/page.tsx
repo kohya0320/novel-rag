@@ -163,9 +163,9 @@ export default function Home() {
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
-                        <span className="text-slate-500 text-xs mr-2">#{index + 1}</span>
-                        <span className="text-lg font-bold">{novel.title}</span>
-                        <p className="text-slate-400 text-sm mt-0.5">
+                        <span className="text-slate-400 text-xs mr-2">#{index + 1}</span>
+                        <span className="text-lg font-bold text-white">{novel.title}</span>
+                        <p className="text-slate-300 text-sm mt-0.5">
                           {novel.author}・{novel.genre}
                         </p>
                       </div>
@@ -173,14 +173,15 @@ export default function Home() {
                         {(novel.similarity * 100).toFixed(0)}% 一致
                       </span>
                     </div>
-                    <p className="text-slate-300 text-sm mb-3 leading-relaxed">
+                    <p className="text-slate-100 text-sm mb-4 leading-relaxed">
                       {novel.description}
                     </p>
                     <div className="space-y-1.5">
+                      <p className="text-slate-400 text-xs font-semibold mb-1">読者の声</p>
                       {novel.reviews.slice(0, 2).map((review, i) => (
                         <blockquote
                           key={i}
-                          className="text-slate-400 text-xs border-l-2 border-slate-600 pl-3 italic leading-relaxed"
+                          className="text-slate-200 text-xs border-l-2 border-slate-500 pl-3 italic leading-relaxed"
                         >
                           {review}
                         </blockquote>
