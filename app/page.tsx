@@ -142,14 +142,6 @@ export default function Home() {
         {/* 検索結果 */}
         {result && (
           <div className="space-y-6">
-            {/* AI推薦文 */}
-            <div className="bg-blue-950/60 border border-blue-700 rounded-2xl p-6">
-              <h2 className="text-base font-semibold mb-3 text-blue-300">AI のおすすめコメント</h2>
-              <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-sm">
-                {stripMarkdown(result.recommendation)}
-              </p>
-            </div>
-
             {/* 小説カード一覧 */}
             <div>
               <h2 className="text-sm font-semibold text-slate-400 mb-3">
@@ -190,6 +182,14 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* AI推薦文 */}
+            <div className="bg-blue-950/60 border border-blue-700 rounded-2xl p-6">
+              <h2 className="text-base font-semibold mb-3 text-blue-300">AI のおすすめコメント</h2>
+              <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-sm">
+                {stripMarkdown(result.recommendation)}
+              </p>
             </div>
           </div>
         )}
