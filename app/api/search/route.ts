@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // 2. Supabase でベクトル類似検索
     const { data: novels, error } = await supabase.rpc('match_novels', {
       query_embedding: queryEmbedding,
-      match_threshold: 0.0,
+      match_threshold: 0.65,
       match_count: 5,
     })
 
