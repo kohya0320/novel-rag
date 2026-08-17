@@ -24,6 +24,13 @@ const EXAMPLE_QUERIES = [
   '努力と才能の葛藤を描いた青春スポーツ小説',
 ]
 
+const RAKUTEN_AFFILIATE_ID = '56a2ff10.56251984.56a2ff11.ca76b269'
+
+const rakutenLink = (title: string) => {
+  const encoded = encodeURIComponent(`https://books.rakuten.co.jp/search/?sitem=${encodeURIComponent(title)}`)
+  return `https://hb.afl.rakuten.co.jp/hgc/${RAKUTEN_AFFILIATE_ID}/?pc=${encoded}`
+}
+
 const stripMarkdown = (text: string) =>
   text
     .replace(/#{1,6}\s*/g, '')
@@ -179,6 +186,14 @@ export default function Home() {
                         </blockquote>
                       ))}
                     </div>
+                    <a
+                      href={rakutenLink(novel.title)}
+                      target="_blank"
+                      rel="nofollow sponsored noopener noreferrer"
+                      className="mt-3 inline-block bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
+                    >
+                      楽天ブックスで購入
+                    </a>
                   </div>
                 ))}
               </div>
