@@ -102,19 +102,6 @@ def create_embedding(client: genai.Client, text: str) -> list[float]:
     return result.embeddings[0].values
 
 
-@retry(max_attempts=3, base_wait=2)
-def generate_reviews(client: genai.Client, title: str, description: str) -> list[str]:
-    prompt = (
-        f"以下の小説について、実際の読者が書きそうな短い感想を2つ生成してください。\n"
-        f"タイトル: {title}\nあらすじ: {description}\n\n"
-        f"各感想は30〜60文字程度で、リアルな読者目線で書いてください。\n"
-        f"出力形式: 感想を改行で区切って2行のみ出力（番号・記号不要）"
-    )
-    result = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-    lines = [line.strip() for line in result.text.strip().split("\n") if line.strip()]
-    return lines[:2]
-
-
 def build_text(book: dict, reviews: list[str]) -> str:
     return "\n".join([
         f"タイトル: {book['title']}",
@@ -136,6 +123,8 @@ def save_to_supabase(supabase, book: dict, embedding: list[float]) -> str:
         "description": book["description"],
         "reviews": book["reviews"],
         "image_url": book.get("image_url", ""),
+        "review_average": book.get("review_average", 0),
+        "review_count": book.get("review_count", 0),
         "embedding": embedding,
     }).execute()
     return "inserted"
@@ -182,20 +171,22 @@ def main():
                 print(f"  処理中: {title}")
 
                 image_url = item.get("largeImageUrl", "") or item.get("mediumImageUrl", "")
-
-                reviews = generate_reviews(gemini_client, title, description[:500])
+                review_average = item.get("reviewAverage", 0) or 0
+                review_count = item.get("reviewCount", 0) or 0
 
                 book = {
                     "title": title,
                     "author": author,
                     "genre": genre_name,
                     "description": description[:500],
-                    "reviews": reviews,
+                    "reviews": [],
                     "image_url": image_url,
+                    "review_average": float(review_average),
+                    "review_count": int(review_count),
                 }
 
                 try:
-                    text = build_text(book, reviews)
+                    text = build_text(book, [])
                     embedding = create_embedding(gemini_client, text)
                 except Exception as e:
                     print(f"    埋め込みエラー（スキップ）: {e}")

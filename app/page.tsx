@@ -8,8 +8,9 @@ interface Novel {
   author: string
   genre: string
   description: string
-  reviews: string[]
   image_url?: string
+  review_average?: number
+  review_count?: number
   similarity: number
 }
 
@@ -187,17 +188,15 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    {novel.reviews.length > 0 && (
-                      <div className="space-y-1.5 mb-3">
-                        <p className="text-slate-400 text-xs font-semibold mb-1">読者の声</p>
-                        {novel.reviews.slice(0, 2).map((review, i) => (
-                          <blockquote
-                            key={i}
-                            className="text-slate-200 text-xs border-l-2 border-slate-500 pl-3 italic leading-relaxed"
-                          >
-                            {review}
-                          </blockquote>
-                        ))}
+                    {novel.review_average != null && novel.review_average > 0 && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-yellow-400 text-sm">
+                          {'★'.repeat(Math.round(novel.review_average))}{'☆'.repeat(5 - Math.round(novel.review_average))}
+                        </span>
+                        <span className="text-slate-300 text-xs">
+                          {novel.review_average.toFixed(1)}
+                          {novel.review_count != null && ` (${novel.review_count}件)`}
+                        </span>
                       </div>
                     )}
                     <a
