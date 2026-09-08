@@ -9,6 +9,7 @@ interface Novel {
   genre: string
   description: string
   reviews: string[]
+  image_url?: string
   similarity: number
 }
 
@@ -160,37 +161,50 @@ export default function Home() {
                     key={novel.id}
                     className="bg-slate-800 rounded-xl p-5 border border-slate-700"
                   >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div>
-                        <span className="text-slate-400 text-xs mr-2">#{index + 1}</span>
-                        <span className="text-lg font-bold text-white">{novel.title}</span>
-                        <p className="text-slate-300 text-sm mt-0.5">
-                          {novel.author}・{novel.genre}
+                    <div className="flex gap-4 mb-3">
+                      {novel.image_url && (
+                        <img
+                          src={novel.image_url}
+                          alt={novel.title}
+                          className="w-16 h-24 object-cover rounded shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div>
+                            <span className="text-slate-400 text-xs mr-2">#{index + 1}</span>
+                            <span className="text-lg font-bold text-white">{novel.title}</span>
+                            <p className="text-slate-300 text-sm mt-0.5">
+                              {novel.author}・{novel.genre}
+                            </p>
+                          </div>
+                          <span className="shrink-0 bg-blue-600/80 text-xs px-2.5 py-1 rounded-full font-medium">
+                            {(novel.similarity * 100).toFixed(0)}% 一致
+                          </span>
+                        </div>
+                        <p className="text-slate-100 text-sm leading-relaxed">
+                          {novel.description}
                         </p>
                       </div>
-                      <span className="shrink-0 bg-blue-600/80 text-xs px-2.5 py-1 rounded-full font-medium">
-                        {(novel.similarity * 100).toFixed(0)}% 一致
-                      </span>
                     </div>
-                    <p className="text-slate-100 text-sm mb-4 leading-relaxed">
-                      {novel.description}
-                    </p>
-                    <div className="space-y-1.5">
-                      <p className="text-slate-400 text-xs font-semibold mb-1">読者の声</p>
-                      {novel.reviews.slice(0, 2).map((review, i) => (
-                        <blockquote
-                          key={i}
-                          className="text-slate-200 text-xs border-l-2 border-slate-500 pl-3 italic leading-relaxed"
-                        >
-                          {review}
-                        </blockquote>
-                      ))}
-                    </div>
+                    {novel.reviews.length > 0 && (
+                      <div className="space-y-1.5 mb-3">
+                        <p className="text-slate-400 text-xs font-semibold mb-1">読者の声</p>
+                        {novel.reviews.slice(0, 2).map((review, i) => (
+                          <blockquote
+                            key={i}
+                            className="text-slate-200 text-xs border-l-2 border-slate-500 pl-3 italic leading-relaxed"
+                          >
+                            {review}
+                          </blockquote>
+                        ))}
+                      </div>
+                    )}
                     <a
                       href={rakutenLink(novel.title)}
                       target="_blank"
                       rel="nofollow sponsored noopener noreferrer"
-                      className="mt-3 inline-block bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
+                      className="mt-2 inline-block bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
                     >
                       楽天ブックスで購入
                     </a>
