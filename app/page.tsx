@@ -222,6 +222,9 @@ export default function Home() {
           </div>
         )}
       </div>
+      <footer className="text-center pb-8 text-slate-500 text-xs">
+        <a href="/privacy" className="hover:text-slate-300 transition">プライバシーポリシー</a>
+      </footer>
     </main>
   )
 }
