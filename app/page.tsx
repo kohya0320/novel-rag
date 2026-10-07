@@ -14,6 +14,10 @@ interface Novel {
   similarity: number
 }
 
+interface FeaturedGenres {
+  [genre: string]: Omit<Novel, 'similarity'>[]
+}
+
 interface SearchResult {
   novels: Novel[]
   recommendation: string
@@ -47,10 +51,15 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [elapsed, setElapsed] = useState<number | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
+  const [featured, setFeatured] = useState<FeaturedGenres | null>(null)
   const avgDurationRef = useRef<number>(12)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    fetch('/api/featured')
+      .then(r => r.json())
+      .then(d => setFeatured(d.genres))
+      .catch(() => {})
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [])
 
@@ -221,6 +230,48 @@ export default function Home() {
             </div>
           </div>
         )}
+      </div>
+        {/* ジャンル別おすすめ */}
+        {!result && featured && (
+          <div className="space-y-10 mt-4">
+            <h2 className="text-sm font-semibold text-slate-400">ジャンル別おすすめ</h2>
+            {Object.entries(featured).map(([genre, novels]) => (
+              <div key={genre}>
+                <h3 className="text-base font-bold text-white mb-3">{genre}</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {novels.map((novel) => (
+                    <div key={novel.id} className="bg-slate-800 rounded-xl p-3 border border-slate-700 flex flex-col">
+                      {novel.image_url && (
+                        <img
+                          src={novel.image_url}
+                          alt={novel.title}
+                          className="w-full h-32 object-cover rounded mb-2"
+                        />
+                      )}
+                      <p className="text-white text-xs font-bold leading-snug mb-1 line-clamp-2">{novel.title}</p>
+                      <p className="text-slate-400 text-xs mb-1">{novel.author}</p>
+                      {novel.review_average != null && novel.review_average > 0 && (
+                        <p className="text-yellow-400 text-xs mb-2">
+                          {'★'.repeat(Math.round(novel.review_average))}{'☆'.repeat(5 - Math.round(novel.review_average))}
+                          <span className="text-slate-400 ml-1">{novel.review_average.toFixed(1)}</span>
+                        </p>
+                      )}
+                      <a
+                        href={rakutenLink(novel.title)}
+                        target="_blank"
+                        rel="nofollow sponsored noopener noreferrer"
+                        className="mt-auto text-center bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full transition-colors"
+                      >
+                        楽天で購入
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
       <footer className="text-center pb-8 text-slate-500 text-xs">
         <a href="/privacy" className="hover:text-slate-300 transition">プライバシーポリシー</a>
