@@ -58,8 +58,11 @@ export default function Home() {
   useEffect(() => {
     fetch('/api/featured')
       .then(r => r.json())
-      .then(d => setFeatured(d.genres))
-      .catch(() => {})
+      .then(d => {
+        if (d.genres) setFeatured(d.genres)
+        else console.error('featured API error:', d)
+      })
+      .catch(e => console.error('featured fetch error:', e))
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [])
 
