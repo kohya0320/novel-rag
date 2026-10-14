@@ -233,7 +233,7 @@ export default function Home() {
             </div>
           </div>
         )}
-      </div>
+
         {/* ジャンル別おすすめ */}
         {!result && featured && (
           <div className="space-y-10 mt-4">
