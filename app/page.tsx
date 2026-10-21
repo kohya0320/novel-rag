@@ -73,12 +73,17 @@ export default async function Home() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {(novels ?? []).map((novel) => (
                     <div key={novel.id} className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex gap-3">
-                      {novel.image_url && (
+                      {novel.image_url ? (
                         <img
                           src={novel.image_url}
                           alt={novel.title}
                           className="w-16 h-24 object-cover rounded shrink-0"
+                          loading="lazy"
                         />
+                      ) : (
+                        <div className="w-16 h-24 bg-slate-700 rounded shrink-0 flex items-center justify-center text-slate-500 text-xs text-center leading-tight px-1">
+                          表紙<br />なし
+                        </div>
                       )}
                       <div className="flex flex-col flex-1 min-w-0">
                         <p className="text-white text-sm font-bold leading-snug mb-1 line-clamp-2">{novel.title}</p>
@@ -96,7 +101,7 @@ export default async function Home() {
                           rel="nofollow sponsored noopener noreferrer"
                           className="mt-auto text-center bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full transition-colors"
                         >
-                          楽天で購入
+                          楽天ブックスで確認する
                         </a>
                       </div>
                     </div>

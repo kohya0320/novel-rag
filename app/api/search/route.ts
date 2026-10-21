@@ -42,12 +42,13 @@ export async function POST(req: NextRequest) {
 
     const novelResults = (novels ?? []) as Novel[]
 
-    // 3. Claude で推薦文を生成（RAG）
-    const recommendation = await generateRecommendation(query, novelResults)
+    // 3. Gemini で推薦文と一致理由を生成（RAG）
+    const { recommendation, matchReasons } = await generateRecommendation(query, novelResults)
 
     return NextResponse.json({
       novels: novelResults,
       recommendation,
+      matchReasons,
     })
   } catch (error) {
     console.error('Search error:', error)

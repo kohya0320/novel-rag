@@ -12,16 +12,20 @@ export interface Novel {
   similarity: number
 }
 
-/**
- * 検索でヒットした小説情報をコンテキストにして、
- * Gemini がユーザーの要望に合ったおすすめを生成する
- */
+export interface RecommendationResult {
+  recommendation: string
+  matchReasons: string[]
+}
+
 export async function generateRecommendation(
   query: string,
   novels: Novel[]
-): Promise<string> {
+): Promise<RecommendationResult> {
   if (novels.length === 0) {
-    return '条件に合致する小説が見つかりませんでした。別のキーワードでお試しください。'
+    return {
+      recommendation: '条件に合致する小説が見つかりませんでした。別のキーワードでお試しください。',
+      matchReasons: [],
+    }
   }
 
   const context = novels
@@ -32,21 +36,24 @@ export async function generateRecommendation(
 著者: ${novel.author}
 ジャンル: ${novel.genre}
 あらすじ: ${novel.description}
-レビュー抜粋:
-${novel.reviews.slice(0, 2).map((r) => `・${r}`).join('\n')}
-類似度スコア: ${(novel.similarity * 100).toFixed(1)}%
 `.trim()
     )
     .join('\n\n---\n\n')
 
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-  const result = await model.generateContent(`あなたは小説推薦の専門家です。ユーザーの要望に基づいて、検索結果の小説をおすすめ順に紹介してください。
+  const result = await model.generateContent(`あなたは小説推薦の専門家です。ユーザーの要望に基づいて、各小説がなぜその検索条件に合っているかを説明してください。
 
-以下のフォーマットで各小説を紹介してください（マークダウン記法は一切使わないこと）:
+以下のJSON形式のみで回答してください（マークダウン・コードブロック不使用）:
+{
+  "recommendation": "全体的な推薦コメント（1〜2文）",
+  "matchReasons": [
+    "候補1がこの検索条件に合う理由（1〜2文、あらすじを根拠にする）",
+    "候補2がこの検索条件に合う理由（1〜2文、あらすじを根拠にする）"
+  ]
+}
 
-【タイトル】
-著者名
-（この要望に合っている理由と魅力を2〜3文で簡潔に）
+matchReasonsの要素数は候補数（${novels.length}個）と同じにしてください。
+あらすじに根拠がない場合は「あらすじから確認できる範囲では〜」と明記してください。
 
 ユーザーの要望:
 「${query}」
@@ -54,5 +61,19 @@ ${novel.reviews.slice(0, 2).map((r) => `・${r}`).join('\n')}
 ベクトル検索でヒットした小説:
 ${context}`)
 
-  return result.response.text()
+  const text = result.response.text().trim()
+
+  try {
+    const jsonText = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    const parsed = JSON.parse(jsonText)
+    return {
+      recommendation: parsed.recommendation ?? '',
+      matchReasons: Array.isArray(parsed.matchReasons) ? parsed.matchReasons : [],
+    }
+  } catch {
+    return {
+      recommendation: text,
+      matchReasons: novels.map(() => ''),
+    }
+  }
 }
