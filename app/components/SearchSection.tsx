@@ -40,11 +40,15 @@ const EXAMPLE_QUERIES = [
 ]
 
 const RAKUTEN_AFFILIATE_ID = '56a2ff10.56251984.56a2ff11.ca76b269'
+const AMAZON_TRACKING_ID = 'kohya0320-22'
 
 const rakutenLink = (title: string) => {
   const encoded = encodeURIComponent(`https://books.rakuten.co.jp/search/?sitem=${encodeURIComponent(title)}`)
   return `https://hb.afl.rakuten.co.jp/hgc/${RAKUTEN_AFFILIATE_ID}/?pc=${encoded}`
 }
+
+const amazonLink = (title: string) =>
+  `https://www.amazon.co.jp/s?k=${encodeURIComponent(title)}&tag=${AMAZON_TRACKING_ID}`
 
 const trackEvent = (name: string, params: Record<string, string | number>) => {
   if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -127,15 +131,26 @@ function NovelCard({ novel, index, matchReason }: { novel: Novel; index: number;
           )}
 
           {/* 購入ボタン */}
-          <a
-            href={rakutenLink(novel.title)}
-            target="_blank"
-            rel="nofollow sponsored noopener noreferrer"
-            onClick={() => trackEvent('rakuten_click', { event_category: 'affiliate', event_label: novel.title, value: index + 1 })}
-            className="mt-3 inline-block bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
-          >
-            楽天ブックスで確認する
-          </a>
+          <div className="mt-3 flex gap-2 flex-wrap">
+            <a
+              href={rakutenLink(novel.title)}
+              target="_blank"
+              rel="nofollow sponsored noopener noreferrer"
+              onClick={() => trackEvent('rakuten_click', { event_category: 'affiliate', event_label: novel.title, value: index + 1 })}
+              className="inline-block bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
+            >
+              楽天ブックスで確認する
+            </a>
+            <a
+              href={amazonLink(novel.title)}
+              target="_blank"
+              rel="nofollow sponsored noopener noreferrer"
+              onClick={() => trackEvent('amazon_click', { event_category: 'affiliate', event_label: novel.title, value: index + 1 })}
+              className="inline-block bg-yellow-500 hover:bg-yellow-400 text-slate-900 text-xs font-semibold px-4 py-1.5 rounded-full transition-colors"
+            >
+              Amazonで確認する
+            </a>
+          </div>
         </div>
       </div>
     </div>

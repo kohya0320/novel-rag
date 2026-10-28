@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import SearchSection from './components/SearchSection'
 
 const RAKUTEN_AFFILIATE_ID = '56a2ff10.56251984.56a2ff11.ca76b269'
+const AMAZON_TRACKING_ID = 'kohya0320-22'
 
 const GENRE_DESCRIPTIONS: Record<string, string> = {
   'ミステリー・サスペンス': '謎と緊張感に満ちた物語。予測不能な展開と巧みなトリックで読者を引き込む作品を集めました。',
@@ -15,6 +16,9 @@ const rakutenLink = (title: string) => {
   const encoded = encodeURIComponent(`https://books.rakuten.co.jp/search/?sitem=${encodeURIComponent(title)}`)
   return `https://hb.afl.rakuten.co.jp/hgc/${RAKUTEN_AFFILIATE_ID}/?pc=${encoded}`
 }
+
+const amazonLink = (title: string) =>
+  `https://www.amazon.co.jp/s?k=${encodeURIComponent(title)}&tag=${AMAZON_TRACKING_ID}`
 
 async function getFeaturedNovels() {
   const { data } = await supabase.rpc('get_featured_novels')
@@ -95,14 +99,24 @@ export default async function Home() {
                           </p>
                         )}
                         <p className="text-slate-300 text-xs leading-relaxed mb-2 line-clamp-3">{novel.description}</p>
-                        <a
-                          href={rakutenLink(novel.title)}
-                          target="_blank"
-                          rel="nofollow sponsored noopener noreferrer"
-                          className="mt-auto text-center bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full transition-colors"
-                        >
-                          楽天ブックスで確認する
-                        </a>
+                        <div className="mt-auto flex flex-col gap-1">
+                          <a
+                            href={rakutenLink(novel.title)}
+                            target="_blank"
+                            rel="nofollow sponsored noopener noreferrer"
+                            className="text-center bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full transition-colors"
+                          >
+                            楽天ブックスで確認する
+                          </a>
+                          <a
+                            href={amazonLink(novel.title)}
+                            target="_blank"
+                            rel="nofollow sponsored noopener noreferrer"
+                            className="text-center bg-yellow-500 hover:bg-yellow-400 text-slate-900 text-xs font-semibold px-2 py-1 rounded-full transition-colors"
+                          >
+                            Amazonで確認する
+                          </a>
+                        </div>
                       </div>
                     </div>
                   ))}
