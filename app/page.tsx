@@ -21,7 +21,9 @@ const amazonLink = (title: string) =>
   `https://www.amazon.co.jp/s?k=${encodeURIComponent(title)}&tag=${AMAZON_TRACKING_ID}`
 
 async function getFeaturedNovels() {
-  const { data } = await supabase.rpc('get_featured_novels')
+  const { data, error } = await supabase.rpc('get_featured_novels')
+  if (error) console.error('get_featured_novels error:', error)
+  console.log('get_featured_novels data count:', data?.length ?? 0)
 
   const GENRE_LABELS: Record<string, string> = {
     'ミステリー・サスペンス': 'ミステリー・サスペンス',
