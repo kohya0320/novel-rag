@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import SearchSection from './components/SearchSection'
 
+export const dynamic = 'force-dynamic'
+
 const RAKUTEN_AFFILIATE_ID = '56a2ff10.56251984.56a2ff11.ca76b269'
 const AMAZON_TRACKING_ID = 'kohya0320-22'
 
